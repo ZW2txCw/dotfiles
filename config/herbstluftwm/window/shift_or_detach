@@ -1,0 +1,29 @@
+#!/usr/bin/env bash
+
+hc() { herbstclient "$@"; }
+
+DIRECTION="$1"
+
+case "$DIRECTION" in
+    'up') SPLITDIR='top' ;;
+    'down') SPLITDIR='bottom' ;;
+    *) SPLITDIR="$DIRECTION" ;;
+esac
+
+declare -A previous_frame
+previous_frame=( [left]=right [down]=up [up]=down [right]=left )
+
+cmd=( chain . lock
+            . or : and , compare tags.focus.curframe_wcount '=' 1
+                       , shift "$DIRECTION"
+                       , focus -e "${previous_frame[$DIRECTION]}"
+                       , remove
+                 : silent shift "$DIRECTION"
+                 : and , compare tags.focus.curframe_wcount gt 1
+                       , split "$SPLITDIR" 0.5
+                       , shift "$DIRECTION"
+            . unlock )
+
+hc "${cmd[@]}"
+
+# vim: set ts=4 sw=4

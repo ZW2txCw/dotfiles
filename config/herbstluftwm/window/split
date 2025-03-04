@@ -1,0 +1,15 @@
+#!/usr/bin/env bash
+
+hc() { herbstclient "$@" ;}
+
+SPLITDIR="$1"
+
+case "$SPLITDIR" in
+    'top') FOCUSDIR='up' ;;
+    'bottom') FOCUSDIR='down' ;;
+    *) FOCUSDIR="$SPLITDIR" ;;
+esac
+
+hc chain . lock . split "$SPLITDIR" 0.5 . focus "$FOCUSDIR" . unlock
+
+# vim: set ts=4 sw=4

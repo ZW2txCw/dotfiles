@@ -1,0 +1,19 @@
+#!/usr/bin/env bash
+
+DMENU=$HOME/.config/herbstluftwm/config/dmenu
+
+OPT="[Cancel]
+poweroff
+reboot
+logout"
+
+CMD="$(echo "$OPT" | $DMENU -p "Exit:")"
+
+case "${CMD}" in
+    'poweroff') systemctl poweroff ;;
+    'reboot') systemctl reboot ;;
+    'logout') herbstclient quit ;;
+    *) exit 0 ;;
+esac
+
+# vim: set ts=4 sw=4

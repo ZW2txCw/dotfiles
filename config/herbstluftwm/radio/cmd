@@ -1,0 +1,22 @@
+#!/usr/bin/env bash
+
+RADIO=$HOME/.config/herbstluftwm/radio
+
+cmd=( "$@" )
+
+send () { echo "$1" > /tmp/mplayer-control ;}
+
+if pgrep -f file=/tmp/mplayer-control; then
+    case "${cmd[0]}" in
+        "next") send "pt_step 1" ;;
+        "prev") send "pt_step -1" ;;
+        "quit") send "quit" ;;
+        "play") send "quit" ;;
+        *) exit 0 ;;
+    esac
+else
+    case "${cmd[0]}" in
+        "play") exec "$RADIO"/radio.rb "${cmd[1]}" ;;
+        *) exit 0 ;;
+    esac
+fi

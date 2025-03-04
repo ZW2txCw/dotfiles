@@ -1,0 +1,11 @@
+#!/usr/bin/env bash
+
+DMENU=$HOME/.config/herbstluftwm/config/dmenu
+
+cmd=$(dmenu_path | $DMENU -p 'Run:')
+
+[[ -z $cmd ]] && exit 0
+
+exec $cmd
+
+# vim: set ts=4 sw=4

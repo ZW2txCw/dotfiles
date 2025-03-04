@@ -1,0 +1,23 @@
+#!/usr/bin/env bash
+
+hc() { herbstclient "$@" ;}
+
+MUL='tags.focus.my_unmaximized_layout'
+
+cmd=( substitute FOCUS clients.focus.winid
+          chain . lock
+                . or : and , silent attr "$MUL"
+                           , compare tags.focus.frame_count '=' 1
+                           , compare tags.focus.tiling.root.algorithm '=' max
+                           , silent substitute MUL "$MUL" load MUL
+                           , remove_attr "$MUL"
+                     : and , compare tags.focus.frame_count ge 2
+                           , silent new_attr string "$MUL"
+                           , set_attr "$MUL" "$(hc dump)"
+                           , load '(clients max:0)'
+                . jumpto FOCUS
+                . unlock )
+
+hc "${cmd[@]}"
+
+# vim: set ts=4 sw=4

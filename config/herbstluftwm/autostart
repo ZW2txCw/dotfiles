@@ -1,0 +1,203 @@
+#!/usr/bin/env bash
+
+hc() { herbstclient "$@"; }
+
+HLWM=$HOME/.config/herbstluftwm
+hc setenv HLWM "$HLWM"
+
+# LOCAL=$HOME/.local/bin
+
+hc emit_hook reload
+hc keyunbind --all
+
+tag_names=( {1..7} )
+tag_keys=( {1..7} )
+
+hc rename default "${tag_names[0]}" || true
+hc set default_frame_layout max
+hc set_layout max
+
+for i in "${!tag_names[@]}" ; do
+    hc add "${tag_names[$i]}"
+    key="${tag_keys[$i]}"
+    if [ -n "$key" ] ; then
+        hc keybind "Mod4-$key" \
+            or : and , compare monitors.focus.tag = "${tag_names[$i]}" \
+                     , use_previous \
+               : use "${tag_names[$i]}"
+
+        hc keybind "Mod4-Shift-$key" move_index "$i"
+        hc keybind "Mod4-Control-$key" chain . move_index "$i" . use_index "$i"
+    fi
+done
+
+hc keybind "Mod4-Return" spawn wezterm
+
+hc keybind "Mod4-Shift-r" reload
+hc keybind "Mod4-Control-r" spawn "$HLWM"/panel/restart_panel
+
+hc keybind "Mod4-comma"  spawn "$HLWM"/tag/use_tag '-1' full
+hc keybind "Mod4-period" spawn "$HLWM"/tag/use_tag '+1' full
+
+hc keybind "Mod4-Shift-comma"  move_index '-1'
+hc keybind "Mod4-Shift-period" move_index '+1'
+
+hc keybind "Mod4-Control-comma"  chain . move_index '-1' . use_index '-1'
+hc keybind "Mod4-Control-period" chain . move_index '+1' . use_index '+1'
+
+hc keybind "Mod4-e"         spawn "$HLWM"/tag/with_empty_tag use
+hc keybind "Mod4-Shift-e"   spawn "$HLWM"/tag/with_empty_tag move
+hc keybind "Mod4-Control-e" spawn "$HLWM"/tag/with_empty_tag move_and_use
+
+hc keybind "Mod4-h" focus left
+hc keybind "Mod4-j" focus down
+hc keybind "Mod4-k" focus up
+hc keybind "Mod4-l" focus right
+
+hc keybind "Mod4-Shift-h" spawn "$HLWM"/window/shift_or_detach left
+hc keybind "Mod4-Shift-j" spawn "$HLWM"/window/shift_or_detach down
+hc keybind "Mod4-Shift-k" spawn "$HLWM"/window/shift_or_detach up
+hc keybind "Mod4-Shift-l" spawn "$HLWM"/window/shift_or_detach right 
+
+hc keybind "Mod4-Control-h" resize left  +0.05
+hc keybind "Mod4-Control-j" resize down  +0.05
+hc keybind "Mod4-Control-k" resize up    +0.05
+hc keybind "Mod4-Control-l" resize right +0.05
+
+hc keybind "Mod4-Left"  spawn "$HLWM"/window/split left
+hc keybind "Mod4-Down"  spawn "$HLWM"/window/split bottom
+hc keybind "Mod4-Up"    spawn "$HLWM"/window/split top
+hc keybind "Mod4-Right" spawn "$HLWM"/window/split right
+
+hc keybind "Mod4-q"                 close
+hc keybind "Mod4-BackSpace"         remove
+hc keybind "Mod4-Shift-BackSpace"   close_or_remove
+hc keybind "Mod4-Control-BackSpace" close_and_remove
+
+hc keybind "Mod4-space" spawn "$HLWM"/toggle/maximize
+hc keybind "Mod4-s"     spawn "$HLWM"/toggle/scratchpad
+hc keybind "Mod4-p"     spawn "$HLWM"/toggle/pad
+hc keybind "Mod4-f"     fullscreen toggle
+
+hc keybind "Mod4-m"          spawn "$HLWM"/window/mark_window toggle
+hc keybind "Mod4-semicolon"  spawn "$HLWM"/window/mark_window jumpto
+hc keybind "Mod4-apostrophe" spawn "$HLWM"/window/mark_window bring
+
+hc keybind "Mod4-i"         jumpto urgent
+hc keybind "Mod4-z"         use_previous
+hc keybind "Mod4-Tab"       cycle
+hc keybind "Mod4-c"         cycle_frame
+hc keybind "Mod4-Shift-f"   set_attr clients.focus.floating toggle
+hc keybind "Mod4-grave"     set_attr tags.focus.floating_focused toggle
+hc keybind "Mod4-Shift-p"   pseudotile toggle
+hc keybind "Mod4-r"         rotate
+hc keybind "Mod4-Control-d" set_attr clients.focus.decorated toggle
+hc keybind "Mod4-Shift-b"   spawn "$HLWM"/window/bring_all_windows
+hc keybind "Mod4-Shift-c"   spawn "$HLWM"/window/center_float
+
+hc keybind "Mod4-o"         spawn "$HLWM"/dmenu/run
+hc keybind "Mod4-n"         spawn "$HLWM"/dmenu/notify
+hc keybind "Mod4-w"         spawn "$HLWM"/dmenu/firemenu
+hc keybind "Mod4-g"         spawn "$HLWM"/dmenu/firebookmarks
+hc keybind "Mod4-Control-c" spawn "$HLWM"/dmenu/bc
+hc keybind "Mod4-Control-q" spawn "$HLWM"/dmenu/exit
+hc keybind "Mod4-v"         spawn "$HLWM"/scripts/volume show
+hc keybind "Mod4-x"         spawn "$HLWM"/scripts/colorpicker
+
+hc keybind "XF86AudioLowerVolume" spawn "$HLWM"/scripts/volume dec_volume
+hc keybind "XF86AudioRaiseVolume" spawn "$HLWM"/scripts/volume inc_volume
+hc keybind "XF86AudioMute"        spawn "$HLWM"/scripts/volume toggle_mute
+
+hc keybind "Mod4-backslash"            spawn "$HLWM"/radio/cmd quit
+hc keybind "Mod4-bracketleft"          spawn "$HLWM"/radio/cmd prev
+hc keybind "Mod4-bracketright"         spawn "$HLWM"/radio/cmd next
+hc keybind "Mod4-Control-bracketleft"  spawn "$HLWM"/radio/cmd play "$HLWM"/radio/plst
+hc keybind "Mod4-Control-bracketright" spawn "$HLWM"/radio/cmd play "$HLWM"/radio/plst1
+
+hc keybind "Mod4-d"       spawn dunstctl close-all
+hc keybind "Mod4-Shift-d" and , spawn killall dunst , spawn dunst
+
+hc mouseunbind --all
+hc mousebind "Mod4-Button1" move
+hc mousebind "Mod4-Button2" zoom
+hc mousebind "Mod4-Button3" resize
+
+hc attr theme.tiling.reset 1
+hc attr theme.floating.reset 1
+
+hc set frame_gap 0
+hc set frame_border_width 0
+hc set frame_border_active_color '#30302c'
+hc set frame_border_normal_color '#30302c'
+hc set frame_bg_active_color '#48584e'
+hc set frame_bg_normal_color '#00000000'
+hc set frame_bg_transparent on
+hc set frame_active_opacity 100
+hc set frame_normal_opacity 100
+hc set frame_transparent_width 5
+hc set frame_padding 5
+hc set show_frame_decorations focused_if_multiple
+
+hc attr theme.background_color '#00000000'
+
+hc attr theme.tiling.border_width 2
+hc attr theme.tiling.active.color '#48584e'
+hc attr theme.tiling.normal.color '#48584e'
+hc attr theme.tiling.urgent.color '#fb8c00'
+
+hc attr theme.floating.border_width 6
+hc attr theme.floating.inner_width  2
+hc attr theme.floating.outer_width  2
+hc attr theme.floating.color               '#222222'
+hc attr theme.floating.active.inner_color  '#789161'
+hc attr theme.floating.active.outer_color  '#789161'
+hc attr theme.floating.normal.inner_color  '#48584e'
+hc attr theme.floating.normal.outer_color  '#48584e'
+hc attr theme.floating.urgent.inner_color  '#fb8c00'
+hc attr theme.floating.urgent.outer_color  '#fb8c00'
+
+hc set window_gap 5
+hc set smart_window_surroundings off
+hc set smart_frame_surroundings off
+hc set mouse_recenter_gap 0
+hc set tree_style '╾│ ├└╼─┐'
+hc set hide_covered_windows on
+hc set tabbed_max off
+
+hc unrule -F
+hc rule focus=on
+hc rule windowtype~'_NET_WM_WINDOW_TYPE_(DIALOG|UTILITY|SPLASH)' pseudotile=on
+hc rule windowtype='_NET_WM_WINDOW_TYPE_DIALOG' focus=on
+hc rule windowtype~'_NET_WM_WIDOW_TYPE_(NOTIFICATION|DOCK|DESKTOP)' manage=off
+hc rule class=Oblogout fullscreen=on
+hc rule class=Insync pseudotile=on
+hc rule class=VirtualBox fullscreen=on
+hc rule class=Arcolinux-tweak-tool.py pseudotile=on
+hc rule class=Arcolinux-welcome-app.py pseudotile=on
+hc rule class=Arcolinux-calamares-tool.py pseudotile=on
+hc rule windowrole=xfce4-terminal-dropdown floating=on
+hc rule class='MPlayer' floating=on floatplacement=center
+hc rule class='feh' floating=on floatplacement=center
+
+hc unlock
+
+if hc silent new_attr bool my_not_first_autostart ; then
+    hc new_attr string my_marked_window
+    hc new_attr string my_scratchpad
+    hc new_attr bool my_bar_is_hidden
+    xsetroot -cursor_name left_ptr
+    xset s off -dpms
+    xset r rate 660 25
+    numlockx off
+    setxkbmap -layout us,ru -variant ,winkeys -option grp:alt_shift_toggle,grp_led:scroll
+    /usr/lib/polkit-gnome/polkit-gnome-authentication-agent-1 &
+    dunst &
+    xfce4-power-manager &
+    picom --config "$HLWM"/config/picom.conf &
+    hsetroot -solid '#222222'
+    # feh --bg-scale "$HLWM"/wallpapers/gray-swirls-abstract.jpg &
+fi
+
+"$HLWM"/panel/panel &
+
+# vim: set ts=4 sw=4

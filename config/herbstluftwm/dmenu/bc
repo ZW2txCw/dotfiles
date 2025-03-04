@@ -1,0 +1,21 @@
+#!/usr/bin/env bash
+
+DMENU=$HOME/.config/herbstluftwm/config/dmenu
+
+OPT="Copy to clipboard
+Clear
+Close"
+
+answer=$(echo "$@" | bc -l | sed '/\./ s/\.\{0,1\}0\{1,\}$//')
+
+action=$(echo "$OPT" | $DMENU -p "= $answer")
+
+case $action in
+    'Clear') $0 ;;
+    'Copy to clipboard') echo -n "$answer" | xsel ;;
+    'Close') ;;
+    '') ;;
+    *) $0 "$answer $action" ;;
+esac
+
+# vim: set ts=4 sw=4

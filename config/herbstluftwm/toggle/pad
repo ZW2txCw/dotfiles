@@ -1,0 +1,22 @@
+#!/usr/bin/env bash
+
+hc() { herbstclient "$@" ;}
+
+CLASS='Bar'
+PAD=25
+ATTR='my_bar_is_hidden'
+
+"$(hc attr clients.focus.fullscreen)" && exit
+
+chain() {
+    cmd=( spawn xdotool search --class "$CLASS" "$1" --sync %@ )
+    hc chain . lock . pad 0 "$2" . "${cmd[@]}" . set_attr "$ATTR" "$3" . unlock
+}
+
+if hc compare monitors.focus.pad_up = 0; then
+    chain windowmap "$PAD" false
+else
+    chain windowunmap 0 true
+fi
+
+# vim: set ts=4 sw=4

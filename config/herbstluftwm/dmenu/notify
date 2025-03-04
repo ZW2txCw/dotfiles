@@ -1,0 +1,64 @@
+#!/usr/bin/env bash
+
+DMENU=$HOME/.config/herbstluftwm/config/dmenu
+SCRIPTS=$HOME/.config/herbstluftwm/scripts
+
+CHOICES="[Cancel]
+date
+diskinfo
+meminfo
+network
+rates
+sint
+updates"
+
+blue='#81a1c1' green='#a3be8c' orange='#bb7744' red='#bf616a'
+
+bar() {
+    duration="$1"
+    shift
+    FN='monospace:size=12' FG='#757d75' BG='#222222'
+    LBAR=( lemonbar -d -g '1631x23+289+0' -f "$FN" -F "$FG" -B "$BG" -o 1 -u 2 )
+    (echo "%{B#30302c}${*}%{B-}"; sleep "$duration") | "${LBAR[@]}"
+}
+
+disk_free() {
+    read -ra arr <<< "$(df -h | awk '/sdb2/ { print $3,$4,$5 }')"
+    res="/dev/sdb2 "
+    res+="[ Used:%{F$red} ${arr[0]} %{F-}]"
+    res+="[ Avail:%{F$green} ${arr[1]} %{F-}]"
+    res+="[%{F$blue} ${arr[2]} %{F-}]"
+    echo "$res"
+}
+
+network() {
+    case "$(ip -br a | awk '/eno1/ { print $2 }')" in
+        'UP') res="%{F$green}UP%{F-}" ;;
+        'DOWN') res="%{F$red}DOWN%{F-}" ;;
+        'UNKNOWN') res="%{F$blue}UNKNOWN%{F-}" ;;
+    esac
+    interface="%{F$orange}INTERFACE%{F-} eno1: $res"
+
+    if ping -q -c 1 -W 1 google.com &>/dev/null; then
+        res2="%{F$green}OK%{F-}"
+    else
+        res2="%{F$red}FAIL%{F-}"
+    fi
+    ping="%{F$orange}PING%{F-} google.com: $res2"
+
+    echo "Network [ $interface ][ $ping ]"
+}
+
+CMD="$(echo "$CHOICES" | $DMENU -p "Notify:")" 
+case "$CMD" in
+    'date') bar 10 "%{B#34381b}%{F#a9b665} $(date) %{F-}%{B-}" ;;
+    'diskinfo') bar 10 " $(disk_free) " ;;
+    'meminfo') bar 10 " $("$SCRIPTS"/meminfo.py) " ;;
+    'network') bar 10 " $(network) " ;;
+    'rates') bar 10 "$(rates.rb usd eur gbp cny)" ;;
+    'sint') bar 5 " СиНТ: %{F$red}$("$SCRIPTS"/sint.rb)%{F-} ₽ " ;;
+    'updates') bar 5 " Updates: %{F$red}$(checkupdates | wc -l)%{F-} " ;;
+    *) exit 0 ;;
+esac
+
+# vim: set ts=4 sw=4

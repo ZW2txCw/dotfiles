@@ -1,0 +1,21 @@
+#!/usr/bin/env bash
+
+hc() { herbstclient "$@" ;}
+
+EMPTIES=$( hc foreach --filter-name="[[:digit:]]*" TAG tags. \
+    and , sprintf COUNT "%c.client_count" TAG compare COUNT = 0 \
+        , sprintf INDEX "%{%c.index}" TAG echo INDEX )
+
+[[ -z $EMPTIES ]] && exit
+
+TAG="$(printf '%s' "$EMPTIES" | head -1)"
+
+case "$1" in
+    'use') hc use_index "$TAG" ;;
+    'move') hc move_index "$TAG" ;;
+    'move_and_use')
+        hc chain . lock . move_index "$TAG" . use_index "$TAG" . unlock ;;
+    *) exit ;;
+esac
+
+# vim: set ts=4 sw=4

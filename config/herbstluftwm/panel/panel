@@ -1,0 +1,45 @@
+#!/usr/bin/env bash
+
+hc() { herbstclient "$@" ;}
+hc watch tags.focus.curframe_wcount
+
+FN='Iosevka Nerd Font:style=Regular:size=12'
+
+draw_tags() {
+    res=" "
+    IFS=$'\t' read -ra tags <<< "$(hc tag_status 0)"
+    unset 'tags[-1]'
+    for tag in "${tags[@]}"; do
+        case ${tag:0:1} in
+            '#') if hc silent attr tags.by-name."${tag:1}".my_unmaximized_layout
+                     then res+="%{+u}%{U#fb8c00} ${tag:1} %{-u} "
+                     else res+="%{+u}%{U#d3d3d3} ${tag:1} %{-u} "
+                 fi ;;
+            ':') res+="%{+u}%{U#757d75} ${tag:1} %{-u} " ;;
+            '!') res+="%{+u}%{U#81a1c1} ${tag:1} %{-u} " ;;
+            '.') res+="%{+u}%{U#30302c} ${tag:1} %{-u} " ;;
+        esac
+    done
+    wcount=$(hc attr tags.focus.curframe_wcount)
+    echo -n "%{B#4f422e}%{F#d8a657} #$wcount %{F-}%{B-}$res"
+}
+
+hc pad 0 25
+
+[[ -n "$(pgrep 'conky')" ]] && killall conky
+conky -c ~/.config/herbstluftwm/config/conky.conf 2>/dev/null \
+	| lemonbar -d -g '55x23+0+0' -f "$FN" -F '#81a1c1' -B '#293a49' -o 1 -u 2 &
+
+hc --idle 2>/dev/null | {
+    draw_tags
+    while true; do
+        IFS=$'\t' read -ra cmd || break
+        case "${cmd[0]}" in
+            'tag'* | 'attribute_changed') draw_tags ;;
+            'quit_panel') exit ;;
+            'reload') exit ;;
+        esac
+    done
+} | lemonbar -d -g '230x23+57+0' -f "$FN" -F '#757d75' -B '#30302c' -o 1 -u 2
+
+# vim: set ts=4 sw=4

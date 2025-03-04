@@ -1,0 +1,52 @@
+#!/usr/bin/env bash
+
+hc() { herbstclient "$@" ;}
+
+ATTR='my_marked_window'
+GEOM='1631x23+289+0'
+FONT='monospace:size=12'
+LBAR=( lemonbar -d -g "$GEOM" -f "$FONT" -B '#222222' -o 1 -u 2 )
+
+notify() { (echo "%{F$1}%{B$2} $3 %{B-}"; sleep 1) | "${LBAR[@]}" & }
+
+toggle() {
+    if hc compare tags.focus.curframe_wcount = 0; then
+        notify '#d8a657' '#4f422e' 'EMPTY FRAME'
+        exit 0
+    fi
+
+    WINID="$(hc attr clients.focus.winid)"
+    if hc compare "$ATTR" = "$WINID"; then
+        hc set_attr "$ATTR" ''
+        notify '#ea6962' '#4c3432' 'UNMARK'
+    else
+        hc set_attr "$ATTR" "$WINID"
+        notify '#a9b665' '#34381b' 'MARK'
+    fi
+}
+
+action() {
+    if [[ -z $(hc attr "$ATTR") ]]; then
+        notify '#d8a657' '#4f422e' 'NO MARKED'
+        exit 0
+    fi
+
+    WINDOW=$( hc foreach --unique C clients. sprintf WINID "%{%c.winid}" C \
+        and . compare "$ATTR" = WINID . echo WINID )
+
+    if [[ -n $WINDOW ]]; then
+        hc "$1" "$WINDOW"
+    else
+        hc set_attr "$ATTR" ''
+        notify '#d8a657' '#4f422e' 'NO MARKED'
+    fi
+}
+
+case "$@" in
+    'toggle') toggle ;;
+    'jumpto') action jumpto ;;
+    'bring') action bring ;;
+    *) exit 0 ;;
+esac
+
+# vim: set ts=4 sw=4

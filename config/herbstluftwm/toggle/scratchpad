@@ -1,0 +1,23 @@
+#!/usr/bin/env bash
+
+hc() { herbstclient "$@" ;}
+
+ATTR='my_scratchpad'
+INDEX=$(( $(hc attr tags.count) - 1 ))
+
+WINDOW=$( hc foreach --unique C clients. \
+    and , sprintf PID "%{%c.pid}" C compare "$ATTR" = PID \
+        , sprintf WINID "%{%c.winid}" C echo WINID )
+
+if [[ -z $WINDOW ]]; then
+    ~/.config/herbstluftwm/toggle/spawn_scratchpad &
+    exit
+fi
+
+cmd=( or : and , compare tags.focus.focused_client.winid '=' "$WINDOW"
+               , move_index "$INDEX"
+         : bring "$WINDOW" )
+
+hc "${cmd[@]}"
+
+# vim: set ts=4 sw=4

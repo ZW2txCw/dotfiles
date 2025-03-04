@@ -1,0 +1,16 @@
+#!/usr/bin/env bash
+
+hc() { herbstclient "$@" ;}
+
+ATTR='my_scratchpad'
+
+spawn_with_rules() {
+    ( hc chain . set_attr "$ATTR" "$BASHPID" \
+               . rule once pid=$BASHPID maxage=10 "${RULES[@]}"
+      exec "$@" ) &
+}
+
+RULES=( floating=on floatplacement=center floating_geometry=954x590 )
+spawn_with_rules wezterm start --always-new-process 2>/tmp/wezterm
+
+# vim: set ts=4 sw=4

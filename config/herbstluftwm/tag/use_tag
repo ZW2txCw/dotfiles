@@ -1,0 +1,48 @@
+#!/usr/bin/env bash
+
+OFFSET=$1
+MODE=$2
+
+case "$MODE" in
+    'full') ch=( '.' ) ;;
+    'empty') ch=( ':' '!' ) ;;
+    *) exit ;;
+esac
+
+hc() { herbstclient "$@" ;}
+
+positive_mod() {
+    local dividend=$1
+    local divisor=$2
+    printf "%d" $(( ((dividend % divisor) + divisor) % divisor ))
+}
+
+check_mode() {
+    local arg1="$1"
+    shift
+    local arr=("$@")
+    local flag=1
+    for i in "${arr[@]}"; do
+        if [[ "$i" = "$arg1" ]]; then
+            flag=0
+        fi
+    done
+    echo $flag
+}
+
+IFS=$'\t' read -ra tags <<<"$(hc tag_status 0)"
+unset 'tags[-1]'
+len_tags=${#tags[@]}
+curr="$(hc attr tags.focus.index)"
+next=$(positive_mod $(( curr + OFFSET )) "$len_tags")
+
+while [[ "$next" != "$curr" ]] \
+	&& [[ "$(check_mode "${tags[$next]:0:1}" "${ch[@]}")" -eq 0 ]]; do
+    next=$(positive_mod $(( next + OFFSET )) "$len_tags")
+done
+
+if [[ "$next" != "$curr" ]]; then
+    hc use_index "$next"
+fi
+
+# vim: set ts=4 sw=4

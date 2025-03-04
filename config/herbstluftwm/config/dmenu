@@ -1,0 +1,13 @@
+#!/bin/sh
+
+W=1631
+X=289
+NF="#a89984"
+NB="#30302c"
+SF="#ea6962"
+SB="#4c3432"
+FN="Monospace:size=12:antialias=true:hintstyle=hintslight"
+
+dmenu -w $W -x $X -fn $FN -nb $NB -nf $NF -sb $SB -sf $SF "$@"
+
+# vim: set ts=4 sw=4

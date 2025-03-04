@@ -1,0 +1,46 @@
+#!/usr/bin/env bash
+
+if [[ -z $(pgrep 'firefox') ]]; then
+    firefox &
+    exit 0
+fi
+
+DMENU=$HOME/.config/herbstluftwm/config/dmenu
+
+CHOICES="[Cancel]
+Color
+Gismeteo
+Herbstluftwm
+Krasinform
+Krasnoyarsk_energo_sbyt
+Lostarmour
+Translate"
+
+CHOICE=$(echo "$CHOICES" | $DMENU -i -p "Go:")
+
+case $CHOICE in
+    'Color') firefox \
+        'https://gradients.app/ru/color' ;;
+
+    'Gismeteo') firefox \
+        'https://www.gismeteo.ru/weather-achinsk-4655/' ;;
+
+    'Krasinform') firefox \
+        'https://vss.krasinform.ru/login/' ;;
+
+    'Krasnoyarsk_energo_sbyt') firefox \
+        'https://lkfl.krsk-sbit.ru/login' ;;
+
+    'Translate') firefox \
+        'https://translate.google.com/?hl=ru&sl=en&tl=ru&op=translate' ;;
+
+    'Herbstluftwm') firefox \
+        'https://herbstluftwm.org/herbstluftwm.html' ;;
+
+    'Lostarmour') firefox \
+        'https://lostarmour.info/map' ;;
+
+    *) exit 0 ;;
+esac
+
+# vim: set ts=4 sw=4

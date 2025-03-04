@@ -1,0 +1,15 @@
+#!/usr/bin/env bash
+
+hc() { herbstclient "$@" ;}
+
+[[ "$(hc attr clients.focus.floating)" == false ]] && exit
+
+screenWidth=1920
+screenHeight=1080 
+geom=$(hc attr clients.focus.floating_geometry)
+geom="${geom%%+*}"
+width="${geom%x*}"
+height="${geom#*x}"
+newPosX=$((screenWidth/2-width/2))
+newPosY=$((screenHeight/2-height/2))
+xdotool getactivewindow windowmove "$newPosX" "$newPosY"

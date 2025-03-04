@@ -1,0 +1,36 @@
+#!/usr/bin/env bash
+
+if [[ -z $(pgrep 'firefox') ]]; then
+    firefox &
+    exit 0
+fi
+
+DMENU=$HOME/.config/herbstluftwm/config/dmenu
+
+CHOICES="[Cancel]
+Google
+URL
+YouTube"
+
+CHOICE=$(echo "$CHOICES" | $DMENU -i -p "Search:")
+
+search() {
+    $DMENU -noinput -p "$1" \
+        | sed -e "$2" -e 's/ /%20/g' \
+        | xargs -r firefox 2>/dev/null
+}
+
+case $CHOICE in
+	'URL') $DMENU -noinput -p 'Enter URL(s):' \
+        | xargs -r firefox 2>/dev/null ;;
+
+	'Google') search 'Search [Google]:' \
+        's|^|https://www.google.com/search?q=|' ;;
+
+    'YouTube') search 'Search [YouTube]:' \
+        's|^|https://youtube.com/results?search_query=|' ;;
+
+    *) exit 0 ;;
+esac
+
+# vim: set ts=4 sw=4

@@ -1,0 +1,6 @@
+#!/usr/bin/env bash
+
+herbstclient emit_hook quit_panel
+~/.config/herbstluftwm/panel/panel &
+
+# vim: set ts=4 sw=4
